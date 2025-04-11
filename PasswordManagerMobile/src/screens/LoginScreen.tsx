@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { setAuthToken } from '@/api/apiClient';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -16,19 +17,23 @@ const LoginScreen = () => {
     const [password, setPassword] = useState('');
     const navigation = useNavigation<LoginScreenNavigationProp>();
 
-  const handleLogin = async () => {
-    try {
-      const response = await login(username, password);
-      await AsyncStorage.setItem('authToken', response.token);
-      navigation.navigate('Dashboard');
-    } catch (error) {
-      if (error instanceof Error && (error as any)?.response?.data?.error) {
-        Alert.alert('Login Failed', (error as any).response.data.error);
-      } else {
-        Alert.alert('Login Failed', 'An error occurred');
+    const handleLogin = async () => {
+      try {
+        const response = await login(username, password);
+        const token = response.data.access_token;
+        
+        // Update both AsyncStorage AND in-memory token
+        await AsyncStorage.setItem('authToken', token);
+        setAuthToken(token); // Add this line
+        
+        // Verify token is set
+        console.log('Current authToken:', token);
+        
+        navigation.navigate('Dashboard');
+      } catch (error) {
+        console.error('Login error:', error);
       }
-    }
-  };
+    };
 
   return (
     <View style={styles.container}>
