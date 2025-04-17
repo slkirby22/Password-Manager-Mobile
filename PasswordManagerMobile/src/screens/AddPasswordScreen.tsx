@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, Alert, ScrollView, Text } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import * as yup from 'yup';
 import { Formik } from 'formik';
 import apiClient from '@/api/apiClient';
+import { Dialog, Portal, Button as PaperButton } from 'react-native-paper';
+import { showAlert } from '@/utils/alertHelpers';
 
 // Form validation schema
 const passwordSchema = yup.object().shape({
@@ -19,42 +21,34 @@ const passwordSchema = yup.object().shape({
 const AddPasswordScreen = () => {
   const navigation = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
 
-  const handleSubmit = async (values: { service_name: any; username: any; password: any; notes: any; }, { resetForm }: any) => {
+  interface FormValues {
+    service_name: string;
+    username: string;
+    password: string;
+    notes?: string;
+  }
+
+  interface FormikHelpers {
+    resetForm: () => void;
+  }
+
+  const handleSubmit = async (values: FormValues, { resetForm }: FormikHelpers) => {
     setIsSubmitting(true);
     try {
-      const response = await apiClient.post('/passwords', {
+      await apiClient.post('/passwords', {
         service_name: values.service_name,
         username: values.username,
         password: values.password,
         notes: values.notes || '',
       });
-
-      Alert.alert(
-        'Success',
-        'Password added successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              resetForm();
-              navigation.goBack();
-            }
-          }
-        ]
-      );
+      
+      setSuccessVisible(true);
+      resetForm();
     } catch (error) {
-      if ((error as any)?.response?.data) {
-        console.error('Add password error:', (error as any).response.data);
-      } else if (error instanceof Error) {
-        console.error('Add password error:', error.message);
-      } else {
-        console.error('Add password error:', error);
-      }
-      Alert.alert(
-        'Error',
-        (error as any)?.response?.data?.error || 'Failed to add password'
-      );
+      const errorMessage = (error as any)?.response?.data?.error || 'Failed to add password';
+      showAlert('Error', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -124,6 +118,28 @@ const AddPasswordScreen = () => {
           </View>
         )}
       </Formik>
+      <Portal>
+      <Dialog 
+        visible={successVisible} 
+        onDismiss={() => {
+          setSuccessVisible(false);
+          (navigation as any).navigate('Dashboard');
+        }}
+      >
+        <Dialog.Title>Success</Dialog.Title>
+        <Dialog.Content>
+          <Text>Password added successfully</Text>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <PaperButton onPress={() => {
+            setSuccessVisible(false);
+            (navigation as any).navigate('Dashboard');
+          }}>
+            OK
+          </PaperButton>
+        </Dialog.Actions>
+      </Dialog>
+      </Portal>
     </ScrollView>
   );
 };

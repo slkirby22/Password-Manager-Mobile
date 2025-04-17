@@ -26,9 +26,6 @@ const LoginScreen = () => {
         await AsyncStorage.setItem('authToken', token);
         setAuthToken(token); // Add this line
         
-        // Verify token is set
-        console.log('Current authToken:', token);
-        
         navigation.navigate('Dashboard');
       } catch (error) {
         console.error('Login error:', error);

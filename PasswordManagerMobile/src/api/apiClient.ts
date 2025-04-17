@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://127.0.0.1:5000/api';
+const API_BASE_URL = 'http://127.0.0.1:5000/api'; // Replace with your actual API base URL
 
 let authToken: string | null = null;
 
@@ -15,13 +15,13 @@ const apiClient = axios.create({
 })();
 
 // Modify the interceptor to use the in-memory token
-apiClient.interceptors.request.use((config) => {
-  if (authToken) {
-    config.headers.Authorization = `Bearer ${authToken}`;
-    console.log('Token attached to request:', authToken); // Debug
+apiClient.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-});
+})
 
 // Add this function to update token after login
 export const setAuthToken = (token: string) => {

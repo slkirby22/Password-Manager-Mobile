@@ -7,6 +7,7 @@ import DashboardScreen from '@/screens/DashboardScreen';
 import AddPasswordScreen from '@/screens/AddPasswordScreen';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider as PaperProvider } from 'react-native-paper';
 
 // Define your root stack param list for type checking
 export type RootStackParamList = {
@@ -19,35 +20,37 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <NavigationContainer>
-          <StatusBar style="auto" />
-          <Stack.Navigator
-            initialRouteName="Login"
-            screenOptions={{
-              headerShown: false,
-              animation: 'fade',
-            }}
-          >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen 
-              name="Dashboard" 
-              component={DashboardScreen} 
-              options={{ gestureEnabled: false }}
-            />
-            <Stack.Screen 
-              name="AddPassword" 
-              component={AddPasswordScreen}
-              options={{
-                presentation: 'modal',
-                headerShown: true,
-                title: 'Add New Password'
+    <PaperProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <NavigationContainer>
+            <StatusBar style="auto" />
+            <Stack.Navigator
+              initialRouteName="Login"
+              screenOptions={{
+                headerShown: false,
+                animation: 'fade',
               }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </AuthProvider>
-    </SafeAreaProvider>
+            >
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen 
+                name="Dashboard" 
+                component={DashboardScreen} 
+                options={{ gestureEnabled: false }}
+              />
+              <Stack.Screen 
+                name="AddPassword" 
+                component={AddPasswordScreen}
+                options={{
+                  presentation: 'modal',
+                  headerShown: true,
+                  title: 'Add New Password'
+                }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </PaperProvider>
   );
 }
